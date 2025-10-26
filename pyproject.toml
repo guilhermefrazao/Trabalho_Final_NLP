@@ -1,0 +1,19 @@
+[project]
+name = "llm-memory-otimization"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "filelock==3.20.0",
+    "fsspec==2025.9.0",
+    "jinja2==3.1.6",
+    "markupsafe==3.0.3",
+    "mpmath==1.3.0",
+    "networkx==3.5",
+    "numpy>=2.3.4",
+    "setuptools==80.9.0",
+    "sympy==1.14.0",
+    "torch==2.9.0",
+    "typing-extensions==4.15.0",
+]

@@ -1,116 +1,60 @@
-📘 Introdução
+# Otimização do modelo TRM (Tiny Recursive Model) para um problema que depende de memôria
 
-Modelos de linguagem pequenos (como DistilGPT, TinyLlama ou versões reduzidas de LLaMA e Mistral) são ideais para aplicações locais, embarcadas ou que rodam em servidores com poucos recursos.
-Mesmo assim, o uso de memória pode ser um gargalo importante — especialmente durante a inferência e o treinamento fino (fine-tuning).
+This project is an implementation of the **Tiny Recursive Model (TRM)**, a highly efficient architecture adapted for memory-intensive problems.
 
-Este guia explica como reduzir o consumo de memória e tornar seu modelo mais eficiente sem perder muita qualidade.
+Based on the paper "Less is More: Recursive Reasoning with Tiny Networks" (arXiv:2510.04871), the TRM uses a very small set of parameters (e.g., a simple 2-layer Transformer) in a **recursive loop**. 
 
-⚙️ 1. Entendendo o Consumo de Memória
-
-O uso de memória em um LLM vem de três fontes principais:
-
-Pesos do modelo — os parâmetros treinados (ex: 1B parâmetros ≈ 4 GB em float32).
-
-Ativações — valores temporários gerados durante a inferência ou o treinamento.
-
-Buffers e gradientes — usados apenas durante o treinamento.
-
-🔹 Dica: durante a inferência, apenas os pesos e ativações importam. Já durante o fine-tuning, os gradientes dobram (ou triplicam) o uso de memória.
-
-🧩 2. Quantização
-
-Quantização converte pesos de precisão alta (ex: float32) para formatos menores (int8, int4, fp16).
-
-🔧 Técnicas comuns:
-Técnica	Descrição	Ganho típico
-FP16	Usa meia precisão (metade dos bits).	~2× menos memória
-INT8	Quantiza pesos inteiros com calibração.	~4× menos memória
-INT4	Extremamente compacta, pode perder precisão.	~8× menos memória
-
-📦 Ferramentas úteis:
-
-bitsandbytes
-
-transformers + accelerate
-
-GGUF / GPTQ / AWQ quantization formats
-
-🔄 3. Offloading e Streaming
-
-Quando a GPU não comporta todo o modelo, é possível dividir o carregamento entre:
-
-GPU + CPU (offloading parcial)
-
-Disco + RAM (streaming de pesos sob demanda)
-
-📘 Ferramentas:
-
-accelerate (Hugging Face)
-
-torch.device_map="auto" para divisão automática
-
-llama.cpp e exllama — executam quantizados direto em CPU
-
-🧠 4. Poda de Pesos (Pruning)
-
-Remove conexões pouco importantes, tornando o modelo mais leve.
-
-Tipos:
-
-Unstructured pruning: remove pesos isolados.
-
-Structured pruning: remove neurônios ou cabeças de atenção inteiras.
-
-➡️ Ideal para quando se quer um modelo menor sem precisar reescrever a arquitetura.
-
-🔍 5. Checkpoint Sharding e Lazy Loading
-
-Durante o carregamento do modelo:
-
-Use lazy loading (carregar pesos apenas quando necessários).
-
-Divida checkpoints grandes em partes menores (shards).
-
-Exemplo com transformers:
-
-from transformers import AutoModelForCausalLM
-model = AutoModelForCausalLM.from_pretrained(
-    "tinyllama/TinyLlama-1.1B",
-    device_map="auto",
-    low_cpu_mem_usage=True
-)
-
-💡 6. Fine-Tuning Eficiente
-
-Para treinar modelos pequenos com pouca memória:
-
-Use LoRA / QLoRA: apenas pequenas matrizes adicionais são treinadas.
-
-Aplique gradiente acumulado para usar lotes menores.
-
-Desative gradientes desnecessários com torch.no_grad() durante inferência.
-
-🔍 7. Monitoramento e Profiling
-
-Use ferramentas para medir o uso real de memória:
-
-import torch
-print(torch.cuda.memory_allocated() / 1e6, "MB")
+Instead of relying on a massive number of parameters like a traditional Large Language Model (LLM), the TRM achieves computational depth by iteratively refining a latent "working memory" state. This approach makes it ideal for tasks where a solution must be built up or refined over multiple steps, using a persistent, evolving memory.
 
 
-Ou:
+## Studied PAPERS
 
-torch.profiler
+1. Less is More: Recursive Reasoning with Tiny Networks
 
-nvidia-smi
+https://arxiv.org/pdf/2510.04871
 
-accelerate.memory_tracker
+2. Hierarchical Reasoning Model
 
-✅ Conclusão
+https://arxiv.org/pdf/2506.21734
 
-Mesmo modelos pequenos podem ser otimizados significativamente.
-Com quantização, offloading e técnicas como LoRA, é possível rodar LLMs em notebooks, servidores leves ou até dispositivos embarcados.
 
-💬 “Eficiência não é só ter menos parâmetros — é saber onde cada byte faz diferença.”
+## 🚀 Getting Started
 
-Quer que eu adicione um exemplo prático (por exemplo, usando um modelo quantizado do Hugging Face rodando localmente)? Isso deixaria o README mais aplicado.
+Follow these steps to set up and run the project.
+
+### 1. Install Dependencies
+
+First, install the necessary Python libraries. You can use `uv` or standard `pip` with the provided `requirements.txt` file.
+
+**Option A (Recommended): Using `uv`**
+```bash
+uv sync
+```
+
+**Option B: Using pip**
+```bash
+pip install -r requirements.txt
+```
+
+**Running the code**
+```bash
+python run main.py
+```
+
+# Benchmarks
+
+GoodAI – LTM Benchmark (GitHub e descrição do benchmark de memória de longo prazo).
+
+https://github.com/GoodAI/goodai-ltm-benchmark
+
+
+MemoryBench – Benchmark de Memória e Aprendizado Contínuo (links para dataset e código no GitHub; dataset no HuggingFace).
+
+Dataset - https://huggingface.co/datasets/THUIR/MemoryBench
+
+Benchmark - https://github.com/LittleDinoC/MemoryBench
+
+
+RULER – Context Size Benchmark (resumo do objetivo e metodologia para contexto longo sintético).
+
+https://github.com/NVIDIA/RULER
