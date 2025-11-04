@@ -47,7 +47,7 @@ pip install -r requirements.txt
 
 **Running the code**
 
-**Create the dataset**
+**Create the dataset used in training**
 ```bash
 python dataset/build_sudoku_dataset.py --output-dir data/sudoku-extreme-1k-aug-1000  --subsample-size 1000 --num-aug 1000  
 ```
@@ -57,7 +57,7 @@ python dataset/build_sudoku_dataset.py --output-dir data/sudoku-extreme-1k-aug-1
 python pretrain.py 
 ```
 
-**Run Training with Custom Hyperparameters**
+**Run Training with Custom Hyperparameters (Real time training update)**
 ```bash
 python pretrain.py arch=trm data_paths="[data/sudoku-extreme-1k-aug-1000]" evaluators="[]" epochs=50000 eval_interval=5000 lr=1e-4 puzzle_emb_lr=1e-4 weight_decay=1.0 puzzle_emb_weight_decay=1.0 arch.L_layers=2 arch.H_cycles=3 arch.L_cycles=4 +run_name=pretrain_sudoku  ema=True global_batch_size=64
 ```

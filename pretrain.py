@@ -18,7 +18,7 @@ import hydra
 import pydantic
 from omegaconf import DictConfig
 
-from model_dataset import PuzzleDataset, PuzzleDatasetConfig, PuzzleDatasetMetadata
+from puzzle_dataset import PuzzleDataset, PuzzleDatasetConfig, PuzzleDatasetMetadata
 from utils.functions import load_model_class, get_model_source_path
 from models.sparse_embedding import CastedSparseEmbeddingSignSGD_Distributed
 from models.ema import EMAHelper
