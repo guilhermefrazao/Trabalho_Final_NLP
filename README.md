@@ -35,10 +35,9 @@ pip install --pre --upgrade torch torchvision torchaudio --index-url https://dow
 wandb login YOUR-LOGIN
 ```
 
-
-**Option A (Recommended): Using `uv`**
+**Windows**
 ```bash
-uv sync
+pip install -U "triton-windows<3.4"  
 ```
 
 **Option B: Using pip**
@@ -50,17 +49,17 @@ pip install -r requirements.txt
 
 **Create the dataset**
 ```bash
-uv run dataset/build_sudoku_dataset.py --output-dir data/sudoku-extreme-1k-aug-1000  --subsample-size 1000 --num-aug 1000  
+python dataset/build_sudoku_dataset.py --output-dir data/sudoku-extreme-1k-aug-1000  --subsample-size 1000 --num-aug 1000  
 ```
 
 **Run Training**
 ```bash
-uv run pretrain.py 
+python pretrain.py 
 ```
 
 **Run Training with Custom Hyperparameters**
 ```bash
-uv run pretrain.py arch=trm data_paths="[data/sudoku-extreme-1k-aug-1000]" evaluators="[]" epochs=50000 eval_interval=5000 lr=1e-4 puzzle_emb_lr=1e-4 weight_decay=1.0 puzzle_emb_weight_decay=1.0 arch.L_layers=2 arch.H_cycles=3 arch.L_cycles=4 +run_name=pretrain_sudoku  ema=True global_batch_size=64
+python pretrain.py arch=trm data_paths="[data/sudoku-extreme-1k-aug-1000]" evaluators="[]" epochs=50000 eval_interval=5000 lr=1e-4 puzzle_emb_lr=1e-4 weight_decay=1.0 puzzle_emb_weight_decay=1.0 arch.L_layers=2 arch.H_cycles=3 arch.L_cycles=4 +run_name=pretrain_sudoku  ema=True global_batch_size=64
 ```
 
 # Benchmarks
