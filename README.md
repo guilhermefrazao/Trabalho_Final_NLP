@@ -17,6 +17,9 @@ https://arxiv.org/pdf/2510.04871
 
 https://arxiv.org/pdf/2506.21734
 
+3. xLSTM: Extended Long Short-Term Memory
+
+https://arxiv.org/pdf/2405.04517
 
 ## 🚀 Getting Started
 
@@ -25,6 +28,13 @@ Follow these steps to set up and run the project.
 ### 1. Install Dependencies
 
 First, install the necessary Python libraries. You can use `uv` or standard `pip` with the provided `requirements.txt` file.
+
+```bash
+pip install --upgrade pip wheel setuptools
+pip install --pre --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu126
+wandb login YOUR-LOGIN
+```
+
 
 **Option A (Recommended): Using `uv`**
 ```bash
@@ -37,15 +47,27 @@ pip install -r requirements.txt
 ```
 
 **Running the code**
+
+**Create the dataset**
 ```bash
-python run main.py
+uv run dataset/build_sudoku_dataset.py --output-dir data/sudoku-extreme-1k-aug-1000  --subsample-size 1000 --num-aug 1000  
+```
+
+**Run Training**
+```bash
+uv run pretrain.py 
+```
+
+**Run Training with Custom Hyperparameters**
+```bash
+uv run pretrain.py arch=trm data_paths="[data/sudoku-extreme-1k-aug-1000]" evaluators="[]" epochs=50000 eval_interval=5000 lr=1e-4 puzzle_emb_lr=1e-4 weight_decay=1.0 puzzle_emb_weight_decay=1.0 arch.L_layers=2 arch.H_cycles=3 arch.L_cycles=4 +run_name=pretrain_sudoku  ema=True global_batch_size=64
 ```
 
 # Benchmarks
 
 GoodAI – LTM Benchmark (GitHub e descrição do benchmark de memória de longo prazo).
 
-https://github.com/GoodAI/goodai-ltm-benchmark
+Benchmark - https://github.com/GoodAI/goodai-ltm-benchmark
 
 
 MemoryBench – Benchmark de Memória e Aprendizado Contínuo (links para dataset e código no GitHub; dataset no HuggingFace).
@@ -57,4 +79,4 @@ Benchmark - https://github.com/LittleDinoC/MemoryBench
 
 RULER – Context Size Benchmark (resumo do objetivo e metodologia para contexto longo sintético).
 
-https://github.com/NVIDIA/RULER
+Benchmark - https://github.com/NVIDIA/RULER
