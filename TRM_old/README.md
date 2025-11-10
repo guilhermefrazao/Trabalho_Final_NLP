@@ -71,8 +71,6 @@ Benchmark - https://github.com/GoodAI/goodai-ltm-benchmark
 
 MemoryBench – Benchmark de Memória e Aprendizado Contínuo (links para dataset e código no GitHub; dataset no HuggingFace).
 
-Dataset - https://huggingface.co/datasets/THUIR/MemoryBench
-
 Benchmark - https://github.com/LittleDinoC/MemoryBench
 
 
