@@ -1,0 +1,38 @@
+{
+  "name": "Python ML (GPU) Dev Container",
+  "build": {
+    "dockerfile": "../Dockerfile", 
+    "context": ".." 
+  },
+
+  
+  "runArgs": [
+    "--gpus",
+    "all"
+  ],
+
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
+
+  "customizations": {
+    "vscode": {
+     
+      "extensions": [
+        "ms-python.python", 
+        "ms-toolsai.jupyter", 
+        "charliermarsh.ruff", 
+        "eamodio.gitlens" 
+      ],
+    
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.analysis.typeCheckingMode": "basic"
+      }
+    }
+  },
+
+  "postCreateCommand": "sleep infinity",
+
+  "shutdownAction": "stopContainer"
+}
