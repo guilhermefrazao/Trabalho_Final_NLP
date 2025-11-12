@@ -50,3 +50,23 @@ Benchmark - https://github.com/LittleDinoC/MemoryBench
 3. RULER – Context Size Benchmark (resumo do objetivo e metodologia para contexto longo sintético).
 
 Benchmark - https://github.com/NVIDIA/RULER
+
+
+# Estrutura das pastas
+.
+├── data    # Datasets para treino
+│   ├── LoCoGen
+│   ├── locomo 
+│   └── PerLTQA
+├── memory    # Memórias dos chats <Sujeito à mudança>
+│   ├── memory_chat_1  # Exemplo de um chat
+│   ├── faiss.index    # Banco vetorial
+│   └── lookup.json    # Banco map
+├── retrieval
+│   ├── base.py      # Interface Retriever
+│   ├── models.py    # Embedding e Reranker importados
+│   ├── naive.py     # NaiveRetriever
+│   ├── reranker.py  # RerankerRetriever
+│   └── store.py     # Busca vetorial <Sujeito à mudança>
+└── writing
+    └── memory_writer.py    # Salva textos na memória <Place-holder>
