@@ -53,7 +53,7 @@ Benchmark - https://github.com/NVIDIA/RULER
 
 
 # Estrutura das pastas
-.
+```.
 ├── data    # Datasets para treino
 │   ├── LoCoGen
 │   ├── locomo 
@@ -69,4 +69,4 @@ Benchmark - https://github.com/NVIDIA/RULER
 │   ├── reranker.py  # RerankerRetriever
 │   └── store.py     # Busca vetorial <Sujeito à mudança>
 └── writing
-    └── memory_writer.py    # Salva textos na memória <Place-holder>
+    └── memory_writer.py    # Salva textos na memória <Place-holder>```
