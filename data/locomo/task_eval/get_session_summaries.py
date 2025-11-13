@@ -78,6 +78,7 @@ def main():
             output = {'sample_id': data['sample_id']}
 
         session_nums = [int(k.split('_')[-1]) for k in data['conversation'].keys() if 'session' in k and 'date_time' not in k]
+        database = {}
         for i in tqdm(range(min(session_nums), max(session_nums) + 1), desc='Generating summaries for %s' % data['sample_id']):
 
             # get the summaries

@@ -2,3 +2,5 @@
 /wandb
 __pycache__
 /.venv
+/writing/models
+/memory/db
