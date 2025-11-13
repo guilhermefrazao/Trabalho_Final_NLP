@@ -2,6 +2,7 @@ import logging
 from typing import Any, Callable
 from threading import Thread
 from queue import Queue
+from uuid import uuid4
 
 from chromadb import PersistentClient
 from chromadb.api import ClientAPI
@@ -13,7 +14,7 @@ from writing.predict import start_session, start_tokenizer, predict
 
 _queue = Queue(maxsize=100)
 
-# logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("memory")
 logger.addHandler(logging.StreamHandler())
 
@@ -45,40 +46,33 @@ class MemoryRepository:
     """
     Gerencia a escrita (adição) de novas memórias no banco de dados vetorial (índice FAISS) e no arquivo de lookup JSON.
     """
+
     def __init__(self, client: ClientAPI):
         self.client = client
         self.collection = self.client.get_or_create_collection("memories")
 
     def get_memories(
-        self,
-        chat_id: str,
-        limit: int = 10,
-        offset: int = 0
+        self, chat_id: str, limit: int = 10, offset: int = 0
     ) -> list[Payload]:
         """
         Recupera todas as memórias de um chat_id.
         """
         r = self.collection.get(
             where={"chat_id": chat_id},
-            include=["metadatas"],
+            include=["metadatas", "documents"],
             limit=limit,
             offset=offset,
         )
-        if (
-            not r["metadatas"]
-            or not r["ids"]
-            or not r["metadatas"][0]
-        ):
+        if not r["metadatas"] or not r["ids"] or not r["metadatas"][0]:
             return []
         return [
             Payload(
-                chat_id=m.get("chat_id"),
-                content=m.get("content"),
-                category=m.get("category"),
+                chat_id=r["metadatas"][i].get("chat_id"),
+                content=r["documents"][i],
+                category=r["metadatas"][i].get("category"),
             )
-            for m in r["metadatas"]
+            for i in range(len(r["metadatas"])) if r["metadatas"] and r["documents"]
         ]
-
 
     def add_memory(
         self,
@@ -88,20 +82,22 @@ class MemoryRepository:
         embeddings: list[float],
     ):
         """
-        Adiciona uma nova memória (query ou resposta) no banco de dados vetorial (índice FAISS) e no arquivo de lookup JSON.
+        Adiciona nova memória ao chromadb.
         """
         payload = Payload(chat_id=chat_id, content=content, category=category)
-        self.collection.add(
+        result = self.collection.add(
             embeddings=[embeddings],
             metadatas=[
                 {
                     "chat_id": payload.chat_id,
-                    "content": payload.content,
                     "category": payload.category,
                 }
             ],
-            ids=[payload.chat_id],
+            documents=[content],
+            ids=[uuid4().hex],
         )
+        print(f"Memória adicionada: {payload}", flush=True)
+        print(f"Resultado: {result}", flush=True)
 
     def get_memory(
         self,
@@ -116,18 +112,21 @@ class MemoryRepository:
         r = self.collection.query(
             query_embeddings=[query],
             n_results=top_k,
-            include=["metadatas", "distances"],
+            include=["metadatas", "distances", "documents"],
             where={"chat_id": chat_id},
         )
         results = []
         if (
             not r["metadatas"]
-            or not r["distances"]
-            or not r["ids"]
             or not r["metadatas"][0]
-            or not r["distances"][0]
             or not r["metadatas"][0][0]
+            or not r["distances"]
+            or not r["distances"][0]
             or not r["distances"][0][0]
+            or not r["documents"]
+            or not r["documents"][0]
+            or not r["documents"][0][0]
+            or not r["ids"]
         ):
             return results
         for i in range(min(len(r["metadatas"][0]), top_k)):
@@ -137,7 +136,7 @@ class MemoryRepository:
                 MemoryResult(
                     payload=Payload(
                         chat_id=r["metadatas"][0][i].get("chat_id"),
-                        content=r["metadatas"][0][i].get("content"),
+                        content=r["documents"][0][i],
                         category=r["metadatas"][0][i].get("category"),
                     ),
                     score=r["distances"][0][i],
@@ -150,7 +149,7 @@ class Memory:
     """
     Gerencia a escrita (adição) de novas memórias no banco de dados vetorial (índice FAISS) e no arquivo de lookup JSON.
     """
-    
+
     def __init__(
         self,
         embedding_model: EmbeddingModel,
@@ -160,9 +159,9 @@ class Memory:
         self.db = MemoryRepository(client)
 
         self.embed_model = embedding_model
-        
+
         self.dimension = self.embed_model.get_embed_dim()
-        
+
         self.consumer_thread = Thread(target=_consumer, args=(self._save_to_disk,))
         self.consumer_thread.start()
 
@@ -172,9 +171,8 @@ class Memory:
         """
         print(f"\nSalvando memória {content} como {category}", flush=True)
         embeddings = self.embed_model.embed_text(content)
-        print(f"Embeddings: {embeddings}", flush=True)
         self.db.add_memory(chat_id, content, category, embeddings)
-        print(f"Memória salva", flush=True)
+        print("Memória salva", flush=True)
 
     def add_memory(self, chat_id: str, content: str):
         """
@@ -195,7 +193,9 @@ if __name__ == "__main__":
     m = Memory(HFEmbeddingModel(), "memory/db")
     chat_id = input("Digite o chat_id (pode ser seu nome, tanto faz): ")
     while True:
-        opt = input("Digite 1 para adicionar uma memória, 2 para recuperar uma memória, 3 para sair: ")
+        opt = input(
+            "Digite 1 para adicionar uma memória, 2 para recuperar uma memória, 3 para sair: "
+        )
         if opt == "3":
             break
         elif opt == "1":
