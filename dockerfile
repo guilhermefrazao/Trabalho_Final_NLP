@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm
+FROM mcr.microsoft.com/devcontainers/python:3.10
 
 WORKDIR /workspace
 

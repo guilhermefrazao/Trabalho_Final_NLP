@@ -8,7 +8,7 @@ def generate_answer_mamba(question : str):
 
     input_ids = tokenizer(question, return_tensors="pt")["input_ids"]
 
-    output = model.generate(input_ids.to(model.device), max_new_tokens=20)
+    output = model.generate(input_ids, max_new_tokens=20)
     print(tokenizer.batch_decode(output))
 
     return tokenizer.batch_decode(output)

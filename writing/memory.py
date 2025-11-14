@@ -96,8 +96,7 @@ class MemoryRepository:
             documents=[content],
             ids=[uuid4().hex],
         )
-        print(f"Memória adicionada: {payload}", flush=True)
-        print(f"Resultado: {result}", flush=True)
+        print(f"Memória adicionada", flush=True)
 
     def get_memory(
         self,

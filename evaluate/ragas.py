@@ -3,7 +3,6 @@ from ragas import evaluate
 from ragas.metrics import (
     context_precision,
     context_recall,
-    context_relevancy,
     faithfulness,
     answer_correctness,
     answer_relevancy,
@@ -25,7 +24,6 @@ def evaluate_ragas(questions, ground_truths, contexts, answers, title=""):
         metrics=[
             context_precision,
             context_recall,
-            context_relevancy,
             faithfulness,
             answer_correctness,
             answer_relevancy,

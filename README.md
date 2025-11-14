@@ -2,6 +2,12 @@
 
 Você pode rodar o pipeline com diferentes modos via linha de comando usando flags do argparse.
 
+Login no hugging face:
+
+```bash
+huggingface-cli login
+```
+
 Rodar o pipeline no modo padrão:
 
 ```bash

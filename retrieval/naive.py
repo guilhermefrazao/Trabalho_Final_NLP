@@ -1,10 +1,10 @@
 from .base import Retriever
-from .store import VectorStore
+from .store import ChromaVectorStore
 
 class NaiveRetriever(Retriever):
     """Realiza busca vetorial simples."""
 
-    def __init__(self, vector_store: VectorStore, k: int):
+    def __init__(self, vector_store: ChromaVectorStore, k: int):
         self.vector_store = vector_store
         self.k = k
         print("NaiveRetriever pronto")
