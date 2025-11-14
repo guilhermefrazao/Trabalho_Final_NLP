@@ -1,10 +1,33 @@
 from models.mamba import generate_answer_mamba
 from evaluate.ragas import evaluate_ragas
 from data.PerLTQA.Dataset.dataset import PerLTMem, PerLTQA
+from retrieval.models import HFEmbeddingModel, RerankerModel
+from retrieval.naive import NaiveRetriever
+from retrieval.reranker import RerankerRetriever
+
+import argparse
 import random
 
+parser = argparse.ArgumentParser()
 
-if __name__ == "__main__":
+parser.add_argument("--reranker", action="store_true", help="Usa o reranker")
+parser.add_argument("--naiverag", action="store_true", help="Usa o naive RAG")
+parser.add_argument("--embeddings", action="store_true", help="Gerando os embeddings")
+
+args = parser.parse_args()
+
+def generate_embeddings(documents: str):
+    emb_model = HFEmbeddingModel()
+    embeddings_docs = emb_model.embed_text(documents)
+    return embeddings_docs
+
+
+def rerank_embeddings(query: str, documents: list[str]):
+    reranker_model = RerankerModel()
+    reranker_model.rank(query=query, documents=documents)
+
+
+def dataset_PerLQTA():
     # load PerLT_Mem dataset
     dataset_mem = PerLTMem()
 
@@ -23,10 +46,32 @@ if __name__ == "__main__":
     samples_Mem = dataset_mem.extract_sample(character_name)
 
     samples_QA = dataset_qa.extract_sample(character_name)
+    
+    return character_data, character_name, character_facts, random_character
 
-    #rag_response = 
+
+
+if __name__ == "__main__":
+
+    character_data, character_name, character_facts, random_character = dataset_PerLQTA()
+
+    if args.embeddings:
+        embeddings = generate_embeddings(character_data)
+
+    else:
+        faiss = "embeddings"
+        embeddings = faiss
 
     prompt = character_data[character_name]
+
+    if args.naiverag:
+        rag = NaiveRetriever().get_context(prompt)
+
+    elif args.reranker:
+        rerank_embeddings(prompt, embeddings)
+        rag = RerankerRetriever().get_context(prompt)
+
+    prompt = prompt + rag
 
     answer = generate_answer_mamba(question=prompt)
 
