@@ -25,6 +25,7 @@ class PerLTMem:
             character_sample = self.character[character_name]
 
         except Exception as e:
+            print(e)
             print(f"No such sample in AgentMem for {character_name}")
             character_sample = {}
         return character_sample
@@ -138,6 +139,7 @@ class PerLTQA:
             character_sample = self.character[character_name]
 
         except Exception as e:
+            print(e)
             print(f"No such sample in AgentMem for {character_name}")
             character_sample = {}
         return character_sample
