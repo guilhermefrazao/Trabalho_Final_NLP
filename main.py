@@ -102,12 +102,12 @@ if __name__ == "__main__":
         embeddings = generate_embeddings(json.dumps(character_facts), client)
 
     if args.naiverag:
-        rag = NaiveRetriever(vector_store=vector_store, k=5).get_context(initial_prompt)
+        rag = NaiveRetriever(vector_store=vector_store, k=5).get_context(initial_prompt)[0]
 
     elif args.reranker:
-        rag = RerankerRetriever(vector_store, RerankerModel().model, 20, 5).get_context(initial_prompt)
+        rag = RerankerRetriever(vector_store, RerankerModel().model, 20, 5).get_context(initial_prompt)[0]
 
-    prompt = initial_prompt + rag[0]
+    prompt = initial_prompt + rag
 
     if args.mamba:
         answer = generate_answer_mamba(question=prompt)
