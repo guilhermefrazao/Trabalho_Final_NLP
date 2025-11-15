@@ -1,12 +1,17 @@
 from sentence_transformers import SentenceTransformer, CrossEncoder
 
-class EmbeddingModel:
-    def __init__(self, model_name: str = 'google/embeddinggemma-300m'):
+from retrieval.base import EmbeddingModel
+
+class HFEmbeddingModel(EmbeddingModel):
+    def __init__(self, model_name: str = "BAAI/bge-base-en-v1.5"):
         self.model = SentenceTransformer(model_name)
         print(f"-> EmbeddingModel carregado: {model_name}")
 
     def embed_text(self, text: str) -> list[float]:
-        return self.model.encode(text)
+        return self.model.encode(text).tolist()
+
+    def get_embed_dim(self) -> int | None:
+        return self.model.get_sentence_embedding_dimension()
     
 
 class RerankerModel:

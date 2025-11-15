@@ -1,3 +1,51 @@
+🚀 Como executar o projeto
+
+Você pode rodar o pipeline com diferentes modos via linha de comando usando flags do argparse.
+
+Login no hugging face:
+
+```bash
+huggingface-cli login
+```
+
+Rodar o pipeline no modo padrão:
+
+```bash
+python main.py
+```
+
+
+⚙️ Rodando com argumentos
+
+Você pode ativar diferentes estratégias do RAG adicionando flags:
+
+🔹 RAG Naive
+
+```bash
+python main.py --naiverag
+```
+
+🔹 Reranker
+
+```bash
+python main.py --reranker
+```
+
+🔹 Embeddings (Gerar novamente os embeddings dos datasets.)
+
+```bash
+python main.py --embeddings
+```
+
+🔹 Combinação de opções
+
+Se quiser combinar várias etapas, basta passar múltiplas flags:
+
+```bash
+python main.py --naiverag --reranker --embeddings
+```
+
+
 # Datasets 
 
 Datasets utilizados para treinar modelos de Linguagem para tarefas relacionadas com a memória das LLMs.
@@ -21,35 +69,28 @@ Sobre - Datase para memória de Longo prazo.
 Paper - https://aclanthology.org/2025.findings-acl.1014.pdf
 Repositório - https://github.com/JamesLLMs/LoCoGen
 
+# Rag
 
+**Naive RAG** 
+**Rag Rerank**
 
 
 # Models
 
 Modelos treinados, otimizados para memória.
 
-1. **Tiny Recursive Models**
+1. **Transformers-like**
 2. **x-LSMT**
-3. **Transformers-like**
+3. **Mamba**
 
 
 # Evaluation
+**RAG Evaluation com Ragas**
 
-Benchmarks para conseguirmos avaliar os modelos desenvolvidos e treinados.
+Para avaliar a qualidade do pipeline de RAG, utilizamos o Ragas, um framework projetado especificamente para medir o desempenho de sistemas de Retrieval-Augmented Generation.
+Ele analisa tanto a etapa de recuperação (retrieval) quanto a qualidade da resposta gerada (generation).
 
-1. GoodAI – LTM Benchmark (GitHub e descrição do benchmark de memória de longo prazo).
-
-Benchmark - https://github.com/GoodAI/goodai-ltm-benchmark
-
-
-2. MemoryBench – Benchmark de Memória e Aprendizado Contínuo (links para dataset e código no GitHub; dataset no HuggingFace).
-
-Benchmark - https://github.com/LittleDinoC/MemoryBench
-
-
-3. RULER – Context Size Benchmark (resumo do objetivo e metodologia para contexto longo sintético).
-
-Benchmark - https://github.com/NVIDIA/RULER
+A função abaixo realiza toda a avaliação usando um conjunto de perguntas, respostas esperadas, contextos recuperados e respostas do modelo.
 
 
 # Estrutura das pastas

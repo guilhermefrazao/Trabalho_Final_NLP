@@ -1,12 +1,12 @@
 from .base import Retriever
-from .store import VectorStore
+from .store import ChromaVectorStore
 from .models import RerankerModel
 
 class RerankerRetriever(Retriever):
     """Realiza busca vetorial + Reranker."""
 
     def __init__(self, 
-                 vector_store: VectorStore, 
+                 vector_store: ChromaVectorStore, 
                  reranker_model: RerankerModel, 
                  initial_k: int, 
                  final_k: int):
