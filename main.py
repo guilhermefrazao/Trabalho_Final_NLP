@@ -25,6 +25,19 @@ parser.add_argument("--xlstm", action="store_true", help="Chamando o modelo xlst
 
 args = parser.parse_args()
 
+
+#TODO: Adicionar a lógica dos outros datasets para realizar a inferência com outros tipos de memória
+#TODO: Escalar a implementação da avaliação para o dataset, por enquanto somente avalia 1 pergunta e resposta por código rodado.
+#TODO: Após realizar a avaliação, salvar os resultados dentro de algum arquivo, separado por modelo utilizado.
+#TODO: Verificar a qualidade do RAG feito (Recupera documentos similares e relevantes?).
+#TODO: Analisar se com base na arquitetura do modelo o resultado é satisfatório?
+
+def find_rand(list: list):
+    random_number = random.randint(0, len(list) - 1)
+    chosen_data = list[random_number]
+    return chosen_data
+
+
 def generate_embeddings(documents: str, client):
     emb_model = HFEmbeddingModel()
     embeddings_docs = emb_model.embed_text(documents)
@@ -35,50 +48,66 @@ def generate_embeddings(documents: str, client):
 def dataset_PerLQTA():
     # load PerLT_Mem dataset
     dataset_mem = PerLTMem()
-
     dataset_qa = PerLTQA()
-    
-    character_data = dataset_qa.read_json_data('data/PerLTQA/Dataset/en/perltqa_en.json')
+
+    character_data = dataset_qa.read_json_data("data/PerLTQA/Dataset/en/perltqa_en.json")
 
     character_facts = dataset_mem.read_json_data("data/PerLTQA/Dataset/en/perltmem_en.json")
 
-    character_names = dataset_mem.extract_character_names()
+    character_names_mem = dataset_mem.extract_character_names()
 
-    random_character = random.randint(0, len(character_names) - 1)
+    character_names_qa = dataset_qa.extract_character_names()
 
-    character_name = list(character_names)[random_character]
+    character_name_mem = find_rand(list(character_names_mem))
 
-    samples_Mem = dataset_mem.extract_sample(character_name)
+    samples_Mem = dataset_mem.extract_sample(character_name_mem)
 
-    samples_QA = dataset_qa.extract_sample(character_name)
-    
-    return samples_QA, samples_Mem, character_facts
+    try:
+        samples_QA = dataset_qa.extract_sample(character_name_mem)
+
+        question = find_rand(samples_QA["profile"])
+
+        initial_prompt = question["Question"]
+        
+    except:
+        character_name_qa = find_rand(list(character_names_qa))
+
+        samples_QA = dataset_qa.extract_sample(character_name_qa)
+
+        question = find_rand(samples_QA["profile"])
+
+        initial_prompt = question["Question"]
+
+        samples_Mem = ""
+
+    return initial_prompt, samples_Mem, character_facts
 
 
 
 if __name__ == "__main__":
     client = PersistentClient(path="memory/db")
 
-    #Foi criado somente o processamento com 1 dos datasets.
-    sample_qa, sample_mem, character_facts = dataset_PerLQTA()
-
-    if args.embeddings:
-        embeddings = generate_embeddings(json.dumps(character_facts), client)
-
     vector_store = ChromaVectorStore(
     client=client,
     embed_model=HFEmbeddingModel(),
     )
 
-    prompt = sample_qa
+    answer = ""
+    rag = ""
+
+    #Foi criado somente o processamento com 1 dos datasets.
+    initial_prompt, sample_mem, character_facts = dataset_PerLQTA()
+
+    if args.embeddings:
+        embeddings = generate_embeddings(json.dumps(character_facts), client)
 
     if args.naiverag:
-        rag = NaiveRetriever(vector_store=vector_store, k=5).get_context(prompt)
+        rag = NaiveRetriever(vector_store=vector_store, k=5).get_context(initial_prompt)
 
     elif args.reranker:
-        rag = RerankerRetriever(vector_store, RerankerModel().model, 20, 5).get_context(prompt)
+        rag = RerankerRetriever(vector_store, RerankerModel().model, 20, 5).get_context(initial_prompt)
 
-    prompt = prompt + rag
+    prompt = initial_prompt + rag[0]
 
     if args.mamba:
         answer = generate_answer_mamba(question=prompt)
@@ -89,4 +118,4 @@ if __name__ == "__main__":
     elif args.xlstm:
         answer = generate_answer_xlstm(question=prompt)
 
-    result = evaluate_ragas(questions=sample_qa, ground_truths=sample_mem, contexts=sample_mem, answers=answer)
+    result = evaluate_ragas(questions=[initial_prompt], ground_truths=[sample_mem], contexts=[rag], answers=[answer])
